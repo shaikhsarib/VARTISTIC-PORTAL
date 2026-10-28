@@ -17,7 +17,7 @@ export function LivePresenceBadge({ currentView }: { currentView?: string }) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="flex items-center gap-2 rounded-full border border-border/50 bg-background/50 px-2.5 py-1 text-xs font-semibold backdrop-blur-md transition-colors hover:bg-background/80 hover:border-emerald-500/40 focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex items-center gap-1.5 sm:gap-2 rounded-full border border-border/50 bg-background/50 px-2 sm:px-2.5 py-1 text-xs font-semibold backdrop-blur-md transition-colors hover:bg-background/80 hover:border-emerald-500/40 focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={`${count} teammate${count === 1 ? "" : "s"} online`}
         >
           {/* Live pulsing green beacon */}
@@ -27,11 +27,11 @@ export function LivePresenceBadge({ currentView }: { currentView?: string }) {
           </span>
 
           <span className="text-[11px] font-bold text-foreground">
-            {count} {count === 1 ? "live" : "online"}
+            {count} <span className="hidden xs:inline">{count === 1 ? "live" : "online"}</span>
           </span>
 
-          {/* Overlapping mini avatars (up to 3) */}
-          <div className="flex -space-x-1.5 overflow-hidden">
+          {/* Overlapping mini avatars (visible on tablet/desktop) */}
+          <div className="hidden sm:flex -space-x-1.5 overflow-hidden">
             {onlineUsers.slice(0, 3).map((u) => (
               <span key={u.id} className="inline-block ring-1 ring-background rounded-full">
                 <Avatar name={u.name} hue={u.avatarHue} size={18} />

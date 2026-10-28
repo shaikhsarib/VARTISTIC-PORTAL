@@ -100,11 +100,11 @@ export function AdminView() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b pb-3">
+      <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto">
         <button
           type="button"
           onClick={() => { setActiveTab("verification"); play("tick"); }}
-          className={`relative flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+          className={`relative flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors whitespace-nowrap ${
             activeTab === "verification"
               ? "bg-primary text-primary-foreground shadow-xs"
               : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -122,7 +122,7 @@ export function AdminView() {
         <button
           type="button"
           onClick={() => { setActiveTab("users"); play("tick"); }}
-          className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+          className={`flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors whitespace-nowrap ${
             activeTab === "users"
               ? "bg-primary text-primary-foreground shadow-xs"
               : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -135,7 +135,7 @@ export function AdminView() {
         <button
           type="button"
           onClick={() => { setActiveTab("analytics"); play("tick"); }}
-          className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+          className={`flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors whitespace-nowrap ${
             activeTab === "analytics"
               ? "bg-primary text-primary-foreground shadow-xs"
               : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -194,11 +194,11 @@ export function AdminView() {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                       <Button
                         size="sm"
                         variant="default"
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex-1 sm:flex-initial text-xs"
                         onClick={() => handleApprove(task.id)}
                         disabled={verifyTask.isPending}
                       >
@@ -208,6 +208,7 @@ export function AdminView() {
                       <Button
                         size="sm"
                         variant="outline"
+                        className="flex-1 sm:flex-initial text-xs"
                         onClick={() => handleRequestChanges(task.id)}
                         disabled={updateTask.isPending}
                       >

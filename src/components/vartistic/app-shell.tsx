@@ -170,25 +170,25 @@ export function AppShell() {
 
         {/* --- Main column --------------------------------------------------- */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="glass sticky top-0 z-30 flex h-16 items-center gap-3 border-b px-4 md:px-6" role="banner">
+          <header className="glass sticky top-0 z-30 flex h-16 items-center gap-2 sm:gap-3 border-b px-3 sm:px-4 md:px-6" role="banner">
             <div className="flex items-center gap-2 md:hidden">
               <LogoMark size={28} />
             </div>
 
-            <div className="relative w-full max-w-xs">
+            <div className="relative w-full max-w-[140px] xs:max-w-[190px] sm:max-w-xs">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--muted-foreground)]" aria-hidden />
               <Input
                 id="global-search"
                 value={filters.q ?? ""}
                 onChange={(e) => { setParams({ q: e.target.value || null, view: view === "dashboard" ? "list" : view }); }}
                 onKeyDown={(e) => { if (e.key === "Enter") setParams({ view: "list" }); }}
-                placeholder="Search tasks… (press /)"
-                className="pl-8"
+                placeholder="Search… (/)"
+                className="pl-8 text-xs sm:text-sm h-9"
                 aria-label="Search tasks globally"
               />
             </div>
 
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-1 sm:gap-2">
               {/* Distinct Role Indicator Badge */}
               {user?.role === "ADMIN" ? (
                 <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-xs font-extrabold text-amber-600 dark:text-amber-400">
@@ -204,6 +204,7 @@ export function AppShell() {
 
               <Button
                 variant="ghost" size="icon"
+                className="hidden sm:inline-flex"
                 aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               >
@@ -212,6 +213,7 @@ export function AppShell() {
 
               <Button
                 variant="ghost" size="icon"
+                className="hidden sm:inline-flex"
                 aria-label={soundEnabled ? "Mute sound cues" : "Enable sound cues"}
                 aria-pressed={soundEnabled}
                 onClick={() => {
@@ -225,11 +227,11 @@ export function AppShell() {
               </Button>
 
               <Button
-                variant="ghost" size="icon" className="relative"
+                variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10"
                 aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`}
                 onClick={() => setNotificationOpen(true)}
               >
-                <Bell className="h-5 w-5" aria-hidden />
+                <Bell className="h-4.5 w-4.5 sm:h-5 sm:w-5" aria-hidden />
                 {unread > 0 ? (
                   <span
                     aria-hidden
@@ -244,8 +246,8 @@ export function AppShell() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="ml-1 rounded-lg focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]" aria-label="Account menu">
-                    <Avatar name={user?.name ?? "?"} hue={user?.avatarHue ?? 0} size={34} />
+                  <button className="ml-0.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]" aria-label="Account menu">
+                    <Avatar name={user?.name ?? "?"} hue={user?.avatarHue ?? 0} size={32} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -293,7 +295,7 @@ export function AppShell() {
             </div>
           </header>
 
-          <main id="main-content" className="flex-1 px-4 py-6 md:px-6" role="main">
+          <main id="main-content" className="flex-1 px-3 py-4 pb-24 sm:px-4 sm:py-6 md:px-6 md:pb-6" role="main">
             <AnimatePresence mode="wait">
               <motion.div
                 key={view}
@@ -312,7 +314,7 @@ export function AppShell() {
             </AnimatePresence>
           </main>
 
-          <footer className="mt-auto border-t px-4 py-4 md:px-6" role="contentinfo">
+          <footer className="mt-auto border-t px-4 py-4 pb-24 md:pb-4 md:px-6" role="contentinfo">
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[color:var(--muted-foreground)]">
               <p className="flex items-center gap-1.5">
                 <LogoMark size={16} /> <span className="font-semibold">Vartistic</span> — internal team task portal
@@ -329,6 +331,60 @@ export function AppShell() {
           </footer>
         </div>
       </div>
+
+      {/* --- Mobile bottom navigation bar (fixed for phone viewports) --- */}
+      <nav
+        aria-label="Mobile Navigation"
+        className="glass fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t bg-background/95 px-1 backdrop-blur-lg md:hidden"
+      >
+        {(user?.role === "ADMIN"
+          ? [
+              { view: "dashboard" as View, label: "Studio", icon: LayoutDashboard },
+              { view: "admin" as View, label: "Admin", icon: ShieldCheck, isAdmin: true },
+              { view: "board" as View, label: "Board", icon: Columns3 },
+              { view: "list" as View, label: "Tasks", icon: ListChecks },
+              { view: "team" as View, label: "Team", icon: Users },
+            ]
+          : [
+              { view: "dashboard" as View, label: "Workbench", icon: Briefcase },
+              { view: "board" as View, label: "Board", icon: Columns3 },
+              { view: "list" as View, label: "Tasks", icon: ListChecks },
+              { view: "calendar" as View, label: "Calendar", icon: CalendarDays },
+              { view: "team" as View, label: "Team", icon: Users },
+            ]
+        ).map((item) => {
+          const active = view === item.view;
+          return (
+            <button
+              key={item.view}
+              onClick={() => { setView(item.view); play("tick"); }}
+              aria-current={active ? "page" : undefined}
+              className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 py-1 text-[11px] font-bold transition-all ${
+                active
+                  ? "isAdmin" in item && item.isAdmin
+                    ? "text-amber-600 dark:text-amber-400 font-extrabold"
+                    : "text-primary font-extrabold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <div className="relative">
+                <item.icon className={`h-5 w-5 ${active ? "scale-110" : ""}`} aria-hidden />
+                {"isAdmin" in item && item.isAdmin && (
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                )}
+              </div>
+              <span className="text-[10px] leading-tight">{item.label}</span>
+              {active && (
+                <span
+                  className={`absolute top-0 h-0.5 w-6 rounded-full ${
+                    "isAdmin" in item && item.isAdmin ? "bg-amber-500" : "bg-primary"
+                  }`}
+                />
+              )}
+            </button>
+          );
+        })}
+      </nav>
 
       <NotificationCenter />
       <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />

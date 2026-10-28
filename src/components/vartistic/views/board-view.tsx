@@ -37,6 +37,7 @@ export function BoardView() {
   const [active, setActive] = useState<TaskDTO | null>(null);
   const [openTaskId, setOpenTaskId] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  const [mobileColumn, setMobileColumn] = useState<string | "ALL">("ALL");
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -97,16 +98,52 @@ export function BoardView() {
           onDragEnd={onDragEnd}
           onDragCancel={() => setActive(null)}
         >
+          {/* Mobile column selector tabs (visible only on small screens) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:hidden">
+            <button
+              type="button"
+              onClick={() => { setMobileColumn("ALL"); play("tick"); }}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors shrink-0 ${
+                mobileColumn === "ALL"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted/70 text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              All Columns ({tasks.length})
+            </button>
+            {COLUMNS.map((col) => {
+              const count = byStatus(col.id).length;
+              return (
+                <button
+                  key={col.id}
+                  type="button"
+                  onClick={() => { setMobileColumn(col.id); play("tick"); }}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors shrink-0 ${
+                    mobileColumn === col.id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {col.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+
           <div className="grid items-start gap-4 md:grid-cols-3">
             {COLUMNS.map((col) => (
-              <BoardColumn
+              <div
                 key={col.id}
-                id={col.id}
-                label={col.label}
-                tasks={byStatus(col.id)}
-                onOpen={setOpenTaskId}
-                reduced={!!reduced}
-              />
+                className={mobileColumn !== "ALL" && mobileColumn !== col.id ? "hidden md:block" : "block"}
+              >
+                <BoardColumn
+                  id={col.id}
+                  label={col.label}
+                  tasks={byStatus(col.id)}
+                  onOpen={setOpenTaskId}
+                  reduced={!!reduced}
+                />
+              </div>
             ))}
           </div>
           <DragOverlay dropAnimation={reduced ? null : undefined}>

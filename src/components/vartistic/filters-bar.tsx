@@ -39,67 +39,69 @@ export function FiltersBar() {
         />
       </div>
 
-      <Select value={filters.status ?? "all"} onValueChange={(v) => setFilter("status", v === "all" ? null : v)}>
-        <SelectTrigger className="w-[140px]" aria-label="Filter by status"><SelectValue placeholder="Status" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All statuses</SelectItem>
-          <SelectItem value="PENDING">Pending</SelectItem>
-          <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-          <SelectItem value="COMPLETED">Completed</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="grid grid-cols-2 xs:flex xs:flex-wrap items-center gap-2 w-full sm:w-auto">
+        <Select value={filters.status ?? "all"} onValueChange={(v) => setFilter("status", v === "all" ? null : v)}>
+          <SelectTrigger className="w-full sm:w-[130px]" aria-label="Filter by status"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="PENDING">Pending</SelectItem>
+            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+            <SelectItem value="COMPLETED">Completed</SelectItem>
+          </SelectContent>
+        </Select>
 
-      <Select value={filters.priority ?? "all"} onValueChange={(v) => setFilter("priority", v === "all" ? null : v)}>
-        <SelectTrigger className="w-[130px]" aria-label="Filter by priority"><SelectValue placeholder="Priority" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All priorities</SelectItem>
-          <SelectItem value="HIGH">High</SelectItem>
-          <SelectItem value="MEDIUM">Medium</SelectItem>
-          <SelectItem value="LOW">Low</SelectItem>
-        </SelectContent>
-      </Select>
+        <Select value={filters.priority ?? "all"} onValueChange={(v) => setFilter("priority", v === "all" ? null : v)}>
+          <SelectTrigger className="w-full sm:w-[130px]" aria-label="Filter by priority"><SelectValue placeholder="Priority" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All priorities</SelectItem>
+            <SelectItem value="HIGH">High</SelectItem>
+            <SelectItem value="MEDIUM">Medium</SelectItem>
+            <SelectItem value="LOW">Low</SelectItem>
+          </SelectContent>
+        </Select>
 
-      <Select value={filters.assigneeId ?? "all"} onValueChange={(v) => setFilter("assigneeId", v === "all" ? null : v)}>
-        <SelectTrigger className="w-[150px]" aria-label="Filter by assignee"><SelectValue placeholder="Assignee" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Anyone</SelectItem>
-          <SelectItem value="mine">Assigned to me</SelectItem>
-          <SelectItem value="none">Unassigned</SelectItem>
-          {meta?.users.map((u) => (
-            <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select value={filters.assigneeId ?? "all"} onValueChange={(v) => setFilter("assigneeId", v === "all" ? null : v)}>
+          <SelectTrigger className="w-full sm:w-[140px]" aria-label="Filter by assignee"><SelectValue placeholder="Assignee" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Anyone</SelectItem>
+            <SelectItem value="mine">Assigned to me</SelectItem>
+            <SelectItem value="none">Unassigned</SelectItem>
+            {meta?.users.map((u) => (
+              <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <Select value={filters.labelId ?? "all"} onValueChange={(v) => setFilter("labelId", v === "all" ? null : v)}>
-        <SelectTrigger className="w-[130px]" aria-label="Filter by label"><SelectValue placeholder="Label" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All labels</SelectItem>
-          {meta?.labels.map((l) => (
-            <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select value={filters.labelId ?? "all"} onValueChange={(v) => setFilter("labelId", v === "all" ? null : v)}>
+          <SelectTrigger className="w-full sm:w-[130px]" aria-label="Filter by label"><SelectValue placeholder="Label" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All labels</SelectItem>
+            {meta?.labels.map((l) => (
+              <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <Select value={filters.due ?? "any"} onValueChange={(v) => setFilter("due", v === "any" ? null : v)}>
-        <SelectTrigger className="w-[150px]" aria-label="Filter by due date"><SelectValue placeholder="Due date" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="any">Any date</SelectItem>
-          <SelectItem value="1">Due today</SelectItem>
-          <SelectItem value="7">Due within 7 days</SelectItem>
-          <SelectItem value="30">Due within 30 days</SelectItem>
-        </SelectContent>
-      </Select>
+        <Select value={filters.due ?? "any"} onValueChange={(v) => setFilter("due", v === "any" ? null : v)}>
+          <SelectTrigger className="w-full sm:w-[140px]" aria-label="Filter by due date"><SelectValue placeholder="Due date" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="any">Any date</SelectItem>
+            <SelectItem value="1">Due today</SelectItem>
+            <SelectItem value="7">Due within 7 days</SelectItem>
+            <SelectItem value="30">Due within 30 days</SelectItem>
+          </SelectContent>
+        </Select>
 
-      <Select value={filters.sort ?? "due"} onValueChange={(v) => setFilter("sort", v)}>
-        <SelectTrigger className="w-[140px]" aria-label="Sort tasks"><SelectValue placeholder="Sort" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="due">Sort: due date</SelectItem>
-          <SelectItem value="created">Sort: newest</SelectItem>
-          <SelectItem value="priority">Sort: priority</SelectItem>
-          <SelectItem value="title">Sort: title</SelectItem>
-        </SelectContent>
-      </Select>
+        <Select value={filters.sort ?? "due"} onValueChange={(v) => setFilter("sort", v)}>
+          <SelectTrigger className="w-full sm:w-[130px]" aria-label="Sort tasks"><SelectValue placeholder="Sort" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="due">Sort: due date</SelectItem>
+            <SelectItem value="created">Sort: newest</SelectItem>
+            <SelectItem value="priority">Sort: priority</SelectItem>
+            <SelectItem value="title">Sort: title</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {activeCount > 0 ? (
         <>

@@ -50,60 +50,121 @@ export function ListView() {
           hint="Nothing matches these filters. Clear them or create a new task."
         />
       ) : (
-        <div className="glass overflow-x-auto rounded-2xl" role="region" aria-label="Task list">
-          <table className="w-full min-w-[720px] text-left text-sm">
-            <caption className="sr-only">Tasks with status, assignee, priority, labels and due dates</caption>
-            <thead>
-              <tr className="border-b bg-muted/60 text-xs uppercase tracking-wide text-[color:var(--muted-foreground)]">
-                <th scope="col" className="px-4 py-3 font-bold">Task</th>
-                <th scope="col" className="px-4 py-3 font-bold">Status</th>
-                <th scope="col" className="px-4 py-3 font-bold">Priority</th>
-                <th scope="col" className="px-4 py-3 font-bold">Assignee</th>
-                <th scope="col" className="px-4 py-3 font-bold">Labels</th>
-                <th scope="col" className="px-4 py-3 font-bold">Due</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.tasks.map((t, i) => (
-                <motion.tr
-                  key={t.id}
-                  initial={reduced ? false : { opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: Math.min(i * 0.02, 0.2) }}
-                  className={`cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/50 ${t.overdue ? "bg-[color:var(--destructive)]/[0.04]" : ""}`}
-                  onClick={() => setOpenTaskId(t.id)}
-                  onKeyDown={(e) => { if (e.key === "Enter") setOpenTaskId(t.id); }}
-                  tabIndex={0}
-                  aria-label={`Open ${t.key}: ${t.title}`}
-                >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-[color:var(--brand-coral)]">{t.key}</span>
-                      <span className="font-semibold">{t.title}</span>
-                      {t.verified ? <span className="rounded bg-[color:var(--success)]/12 px-1.5 py-0.5 text-[10px] font-bold text-[color:var(--success)]">Verified</span> : null}
-                      {t.overdue ? <span className="rounded bg-[color:var(--destructive)]/10 px-1.5 py-0.5 text-[10px] font-bold text-[color:var(--destructive)]">Overdue</span> : null}
-                    </div>
-                    {t.delayReason && t.overdue ? (
-                      <p className="mt-0.5 text-xs italic text-[color:var(--warning)]">⚠ {t.delayReason}</p>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3"><StatusChip status={t.status} /></td>
-                  <td className="px-4 py-3"><PriorityChip priority={t.priority} /></td>
-                  <td className="px-4 py-3">
-                    {t.assignee ? (
-                      <span className="flex items-center gap-2">
-                        <Avatar name={t.assignee.name} hue={t.assignee.avatarHue} size={24} />
-                        <span className="text-xs font-semibold">{t.assignee.name}</span>
+        <>
+          {/* Mobile card presentation (< md) */}
+          <div className="space-y-2.5 md:hidden" role="list" aria-label="Task list for mobile">
+            {data.tasks.map((t, i) => (
+              <motion.div
+                key={t.id}
+                role="listitem"
+                initial={reduced ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i * 0.02, 0.2) }}
+                className={`cursor-pointer rounded-2xl border border-border/80 bg-card p-4 shadow-xs transition-all hover:border-primary/50 ${
+                  t.overdue ? "border-destructive/40 bg-destructive/5" : ""
+                }`}
+                onClick={() => setOpenTaskId(t.id)}
+                onKeyDown={(e) => { if (e.key === "Enter") setOpenTaskId(t.id); }}
+                tabIndex={0}
+                aria-label={`Open ${t.key}: ${t.title}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-[color:var(--brand-coral)]">{t.key}</span>
+                    <PriorityChip priority={t.priority} />
+                    {t.verified ? (
+                      <span className="rounded bg-[color:var(--success)]/12 px-1.5 py-0.5 text-[10px] font-bold text-[color:var(--success)]">
+                        Verified
                       </span>
-                    ) : <span className="text-xs italic text-[color:var(--muted-foreground)]">Unassigned</span>}
-                  </td>
-                  <td className="px-4 py-3"><span className="flex flex-wrap gap-1">{t.labels.map((l) => <LabelChip key={l.id} label={l} />)}</span></td>
-                  <td className="px-4 py-3"><DueChip task={t} /></td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    ) : null}
+                    {t.overdue ? (
+                      <span className="rounded bg-[color:var(--destructive)]/10 px-1.5 py-0.5 text-[10px] font-bold text-[color:var(--destructive)]">
+                        Overdue
+                      </span>
+                    ) : null}
+                  </div>
+                  <StatusChip status={t.status} />
+                </div>
+
+                <h3 className="mt-2 text-sm font-bold text-foreground leading-snug">{t.title}</h3>
+
+                {t.delayReason && t.overdue && (
+                  <p className="mt-1 text-xs italic text-[color:var(--warning)]">⚠ {t.delayReason}</p>
+                )}
+
+                <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-2.5 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    {t.assignee ? (
+                      <>
+                        <Avatar name={t.assignee.name} hue={t.assignee.avatarHue} size={20} />
+                        <span className="font-semibold text-foreground text-[11px]">{t.assignee.name}</span>
+                      </>
+                    ) : (
+                      <span className="italic text-muted-foreground text-[11px]">Unassigned</span>
+                    )}
+                  </div>
+                  <DueChip task={t} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Desktop & Tablet Table Presentation (>= md) */}
+          <div className="glass hidden md:block overflow-x-auto rounded-2xl" role="region" aria-label="Task list">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <caption className="sr-only">Tasks with status, assignee, priority, labels and due dates</caption>
+              <thead>
+                <tr className="border-b bg-muted/60 text-xs uppercase tracking-wide text-[color:var(--muted-foreground)]">
+                  <th scope="col" className="px-4 py-3 font-bold">Task</th>
+                  <th scope="col" className="px-4 py-3 font-bold">Status</th>
+                  <th scope="col" className="px-4 py-3 font-bold">Priority</th>
+                  <th scope="col" className="px-4 py-3 font-bold">Assignee</th>
+                  <th scope="col" className="px-4 py-3 font-bold">Labels</th>
+                  <th scope="col" className="px-4 py-3 font-bold">Due</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.tasks.map((t, i) => (
+                  <motion.tr
+                    key={t.id}
+                    initial={reduced ? false : { opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: Math.min(i * 0.02, 0.2) }}
+                    className={`cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/50 ${t.overdue ? "bg-[color:var(--destructive)]/[0.04]" : ""}`}
+                    onClick={() => setOpenTaskId(t.id)}
+                    onKeyDown={(e) => { if (e.key === "Enter") setOpenTaskId(t.id); }}
+                    tabIndex={0}
+                    aria-label={`Open ${t.key}: ${t.title}`}
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-[color:var(--brand-coral)]">{t.key}</span>
+                        <span className="font-semibold">{t.title}</span>
+                        {t.verified ? <span className="rounded bg-[color:var(--success)]/12 px-1.5 py-0.5 text-[10px] font-bold text-[color:var(--success)]">Verified</span> : null}
+                        {t.overdue ? <span className="rounded bg-[color:var(--destructive)]/10 px-1.5 py-0.5 text-[10px] font-bold text-[color:var(--destructive)]">Overdue</span> : null}
+                      </div>
+                      {t.delayReason && t.overdue ? (
+                        <p className="mt-0.5 text-xs italic text-[color:var(--warning)]">⚠ {t.delayReason}</p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3"><StatusChip status={t.status} /></td>
+                    <td className="px-4 py-3"><PriorityChip priority={t.priority} /></td>
+                    <td className="px-4 py-3">
+                      {t.assignee ? (
+                        <span className="flex items-center gap-2">
+                          <Avatar name={t.assignee.name} hue={t.assignee.avatarHue} size={24} />
+                          <span className="text-xs font-semibold">{t.assignee.name}</span>
+                        </span>
+                      ) : <span className="text-xs italic text-[color:var(--muted-foreground)]">Unassigned</span>}
+                    </td>
+                    <td className="px-4 py-3"><span className="flex flex-wrap gap-1">{t.labels.map((l) => <LabelChip key={l.id} label={l} />)}</span></td>
+                    <td className="px-4 py-3"><DueChip task={t} /></td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       <TaskDetailSheet taskId={openTaskId} onClose={() => setOpenTaskId(null)} />
