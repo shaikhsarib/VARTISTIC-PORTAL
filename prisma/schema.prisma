@@ -1,0 +1,241 @@
+// Vartistic — team task portal schema
+// SQLite via Prisma. Indexes tuned for the common filter/sort paths:
+//   tasks by status, assignee, team, dueDate, verified; notifications by user+read state.
+// NOTE: SQLite has no native enum support in Prisma, so Role/TaskStatus/TaskPriority/
+// NotificationType are validated at the boundary with zod (src/lib/validation/schemas.ts).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity & access
+// ---------------------------------------------------------------------------
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  username       String?   @unique
+  name           String
+  passwordHash   String
+  role           String    @default("MEMBER") // ADMIN | MANAGER | MEMBER (zod-validated)
+  title          String?
+  profileCompleted Boolean @default(false)
+  avatarHue      Int       @default(0) // 0-360, deterministic avatar color from brand wheel
+  github         String?
+  repo           String?
+  // gamification state (ported from legacy testing.py domain rules)
+  points         Int       @default(0)
+  streak         Int       @default(0)
+  lastActiveDate String? // ISO date string "YYYY-MM-DD"
+  soundEnabled   Boolean   @default(false) // sound cues OFF by default, persisted
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  sessions       Session[]
+  commits        Commit[] @relation("CommitAuthor")
+  assignedTasks  Task[]    @relation("TaskAssignee")
+  createdTasks   Task[]    @relation("TaskCreator")
+  verifiedTasks  Task[]    @relation("TaskVerifier")
+  comments       Comment[]
+  activities     Activity[]
+  notifications  Notification[]
+  actedNotifications Notification[] @relation("NotificationActor")
+  teamMemberships TeamMember[]
+  feedPosts      FeedPost[] @relation("FeedAuthor")
+
+  @@index([role])
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique // sha256 of the raw session token; raw token only lives in the cookie
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent String?
+  ip        String?
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ---------------------------------------------------------------------------
+// Teams
+// ---------------------------------------------------------------------------
+
+model Team {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  slug      String       @unique
+  createdAt DateTime     @default(now())
+
+  tasks     Task[]
+  members   TeamMember[]
+}
+
+model TeamMember {
+  teamId   String
+  team     Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // role within the team; org-level role lives on User
+  isLead   Boolean @default(false)
+
+  @@id([teamId, userId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Tasks
+// ---------------------------------------------------------------------------
+
+model Task {
+  id             String       @id @default(cuid())
+  key            String       @unique // human key, e.g. TSK-101
+  title          String
+  description    String       @default("")
+  status         String       @default("PENDING") // PENDING | IN_PROGRESS | COMPLETED (zod-validated)
+  priority       String       @default("MEDIUM") // LOW | MEDIUM | HIGH (zod-validated)
+  dueDate        DateTime?
+  delayReason    String       @default("") // required when overdue/blocker (legacy rule)
+  isSelfInitiated Boolean     @default(false) // proactive extra work flag (legacy rule)
+  githubLink     String?
+  attachmentName String?
+  verified       Boolean      @default(false) // admin/manager verification only (legacy rule)
+  verifiedById   String?
+  verifiedBy     User?        @relation("TaskVerifier", fields: [verifiedById], references: [id])
+  verifiedAt     DateTime?
+  assigneeId     String?
+  assignee       User?        @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdById    String
+  createdBy      User         @relation("TaskCreator", fields: [createdById], references: [id])
+  teamId         String
+  team           Team         @relation(fields: [teamId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  comments       Comment[]
+  activities     Activity[]
+  labels         TaskLabel[]
+  commits        Commit[]
+  notifications  Notification[]
+
+  @@index([status])
+  @@index([assigneeId])
+  @@index([teamId])
+  @@index([dueDate])
+  @@index([status, priority])
+  @@index([createdAt])
+}
+
+model Label {
+  id    String      @id @default(cuid())
+  name  String      @unique
+  color String // hex token key, e.g. "coral" | "blue" | "yellow" | "ink" | "moss"
+  tasks TaskLabel[]
+}
+
+model TaskLabel {
+  taskId  String
+  task    Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  labelId String
+  label   Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+  @@index([labelId])
+}
+
+// ---------------------------------------------------------------------------
+// Collaboration
+// ---------------------------------------------------------------------------
+
+model Comment {
+  id        String    @id @default(cuid())
+  taskId    String
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id])
+  parentId  String? // threaded replies
+  parent    Comment?  @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentThread")
+  body      String // sanitized rich text (stripped HTML)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([taskId, createdAt])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id])
+  type      String // CREATED | STATUS_CHANGED | ASSIGNED | PRIORITY | DUE | COMMENT | COMMIT | VERIFIED | LABEL | EDITED
+  detail    String   @default("") // human-readable, e.g. "status: PENDING → IN_PROGRESS"
+  createdAt DateTime @default(now())
+
+  @@index([taskId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Notifications (in-app only; email would be a future integration)
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id        String          @id @default(cuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actorId   String?
+  actor     User?           @relation("NotificationActor", fields: [actorId], references: [id])
+  type      String // ASSIGNED | MENTION | COMMENT | DUE_SOON | OVERDUE | STATUS_CHANGED | VERIFIED (zod-validated)
+  title     String
+  body      String          @default("")
+  taskId    String?
+  task      Task?           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  readAt    DateTime?
+  createdAt DateTime        @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Commit log per task (ported legacy `commits: [{hash,msg,time}]`)
+// ---------------------------------------------------------------------------
+
+model Commit {
+  id       String   @id @default(cuid())
+  taskId   String
+  task     Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId String
+  author   User     @relation("CommitAuthor", fields: [authorId], references: [id])
+  hash     String // short commit hash
+  msg      String
+  createdAt DateTime @default(now())
+
+  @@index([taskId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Standup feed (ported legacy concept: Progress / Commit / Blocker broadcast)
+// ---------------------------------------------------------------------------
+
+model FeedPost {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation("FeedAuthor", fields: [authorId], references: [id])
+  type      String // Progress | Commit | Blocker
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

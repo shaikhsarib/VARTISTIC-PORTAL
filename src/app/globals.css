@@ -1,0 +1,225 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * VARTISTIC DESIGN TOKENS — derived once from the brand SVG (02 · PALETTE):
+ *   ink    #111111   coral  #ff5b3a   blue   #2b59ff   yellow #ffc531   cream #f6efe3
+ * Light theme = warm paper + ink text + deepened coral for AA.
+ * Dark theme  = near-ink surfaces + cream text + brand coral (AA on ink).
+ * Every pairing below is WCAG AA verified (scripts/check-contrast.py).
+ */
+
+:root {
+  /* brand ramp */
+  --brand-ink: #111111;
+  --brand-coral: #ff5b3a;
+  --brand-coral-deep: #d93a12; /* light-theme primary: 4.6:1 with white text */
+  --brand-blue: #2b59ff;
+  --brand-yellow: #ffc531;
+  --brand-cream: #f6efe3;
+
+  /* semantic — light */
+  --background: #faf7f2;
+  --foreground: #17150f;
+  --card: #ffffff;
+  --card-foreground: #17150f;
+  --popover: #ffffff;
+  --popover-foreground: #17150f;
+  --primary: #d93a12;
+  --primary-foreground: #ffffff;
+  --secondary: #f0ebe2;
+  --secondary-foreground: #17150f;
+  --muted: #f0ebe2;
+  --muted-foreground: #5c574d;
+  --accent: #fdeae4;
+  --accent-foreground: #8f2a0c;
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+  --success: #1b7a4e;
+  --success-foreground: #ffffff;
+  --warning: #8a5a00;
+  --warning-foreground: #ffffff;
+  --info: #1d3fd1;
+  --info-foreground: #ffffff;
+  --border: #e5ded2;
+  --input: #e5ded2;
+  --ring: #d93a12;
+
+  /* glass signature (luminous frosted backdrop) */
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-border: rgba(17, 17, 17, 0.07);
+  --glass-shadow: 0 12px 32px -10px rgba(17, 17, 17, 0.08);
+
+  /* charts */
+  --chart-1: #ff5b3a;
+  --chart-2: #2b59ff;
+  --chart-3: #ffc531;
+  --chart-4: #1b7a4e;
+  --chart-5: #8f2a0c;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+.dark {
+  --background: #0e0e11;
+  --foreground: #f4f1ea;
+  --card: #16161c;
+  --card-foreground: #f4f1ea;
+  --popover: #16161c;
+  --popover-foreground: #f4f1ea;
+  --primary: #ff5b3a;
+  --primary-foreground: #111111;
+  --secondary: #1e1e25;
+  --secondary-foreground: #f4f1ea;
+  --muted: #1e1e25;
+  --muted-foreground: #a8a49b;
+  --accent: #331a13;
+  --accent-foreground: #ff8a70;
+  --destructive: #ff6b5e;
+  --destructive-foreground: #1a0503;
+  --success: #3ecf8e;
+  --success-foreground: #052015;
+  --warning: #ffc531;
+  --warning-foreground: #201401;
+  --info: #7b93ff;
+  --info-foreground: #0a0f2a;
+  --border: #26262e;
+  --input: #26262e;
+  --ring: #ff5b3a;
+
+  --glass-bg: rgba(14, 14, 18, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.45);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-coral: var(--brand-coral);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-cream: var(--brand-cream);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-jb), ui-monospace, monospace;
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- glass surface primitive -------------------------------------------- */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* --- focus visibility ----------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- live region utility -------------------------------------------------- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- scrollbars ----------------------------------------------------------- */
+.scroll-slim::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+.scroll-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* --- arc bands background (adapted from opensourceui.in, MIT — see NOTICE) */
+.arc-bands {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.arc-band {
+  position: absolute;
+  bottom: -60%;
+  left: 50%;
+  width: 160vmax;
+  height: 160vmax;
+  translate: -50% 0;
+  border-radius: 50%;
+  mask-image: radial-gradient(closest-side, transparent calc(100% - 26px), black calc(100% - 25px));
+  -webkit-mask-image: radial-gradient(closest-side, transparent calc(100% - 26px), black calc(100% - 25px));
+}
+
+/* --- reduced motion ------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
