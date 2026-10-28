@@ -343,6 +343,7 @@ export function AppShell() {
               { view: "admin" as View, label: "Admin", icon: ShieldCheck, isAdmin: true },
               { view: "board" as View, label: "Board", icon: Columns3 },
               { view: "list" as View, label: "Tasks", icon: ListChecks },
+              { view: "calendar" as View, label: "Calendar", icon: CalendarDays },
               { view: "team" as View, label: "Team", icon: Users },
             ]
           : [
